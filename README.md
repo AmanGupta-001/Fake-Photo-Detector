@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FakePhoto Detector 🔍
 
 A lightweight machine learning tool that classifies whether an image is a **genuine photograph** or a **screen recapture** (a photo taken of a screen) — with no GPU required.
@@ -105,3 +106,6 @@ python train.py
 ## License
 
 MIT
+=======
+# Fake-Photo-Detector
+>>>>>>> b3c9f0dfdee0adf32a66e987523aaed3ddbb0797
