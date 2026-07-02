@@ -1,0 +1,9 @@
+opencv-python-headless
+scikit-learn
+joblib
+scipy
+numpy
+streamlit
+plotly
+pillow
+pillow-heif

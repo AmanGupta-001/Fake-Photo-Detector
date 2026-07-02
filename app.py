@@ -12,7 +12,7 @@ import tempfile
 import time
 from pathlib import Path
 
-import cv2
+
 import joblib
 import numpy as np
 import plotly.graph_objects as go
