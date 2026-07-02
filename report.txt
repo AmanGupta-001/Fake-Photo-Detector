@@ -1,0 +1,76 @@
+==========================================================
+SPOT THE FAKE PHOTO — Training Report
+==========================================================
+
+Dataset : 49 real + 50 screen = 99 images
+Features: 20  (fft_lo, fft_mid, fft_hi, fft_peak_ratio, hough_line_density, hough_rect_score, glare_frac, glare_blob_frac, hue_mean, hue_std, sat_mean, sat_std, blue_bias, lap_var, lbp_entropy, lbp_uniformity, dct_ac_mean, dct_ac_std, dct_ac_skew, edge_density)
+
+-- logistic --
+  Accuracy (5-fold CV) : 0.9091
+  AUC-ROC  (5-fold CV) : 0.9518
+  Confusion matrix:
+    [[TN=45  FP=4]
+     [FN=5  TP=45]]
+              precision    recall  f1-score   support
+
+        real       0.90      0.92      0.91        49
+      screen       0.92      0.90      0.91        50
+
+    accuracy                           0.91        99
+   macro avg       0.91      0.91      0.91        99
+weighted avg       0.91      0.91      0.91        99
+
+
+-- random_forest --
+  Accuracy (5-fold CV) : 0.9394
+  AUC-ROC  (5-fold CV) : 0.9963
+  Confusion matrix:
+    [[TN=46  FP=3]
+     [FN=3  TP=47]]
+              precision    recall  f1-score   support
+
+        real       0.94      0.94      0.94        49
+      screen       0.94      0.94      0.94        50
+
+    accuracy                           0.94        99
+   macro avg       0.94      0.94      0.94        99
+weighted avg       0.94      0.94      0.94        99
+
+
+-- grad_boost --
+  Accuracy (5-fold CV) : 0.8889
+  AUC-ROC  (5-fold CV) : 0.8912
+  Confusion matrix:
+    [[TN=43  FP=6]
+     [FN=5  TP=45]]
+              precision    recall  f1-score   support
+
+        real       0.90      0.88      0.89        49
+      screen       0.88      0.90      0.89        50
+
+    accuracy                           0.89        99
+   macro avg       0.89      0.89      0.89        99
+weighted avg       0.89      0.89      0.89        99
+
+
+==========================================================
+Selected : random_forest  acc=0.9394  auc=0.9963
+
+Feature importances (top 10):
+  hue_mean                 0.1855  █████████
+  fft_lo                   0.1670  ████████
+  fft_mid                  0.1331  ██████
+  fft_hi                   0.1275  ██████
+  dct_ac_mean              0.0670  ███
+  lap_var                  0.0510  ██
+  hough_line_density       0.0402  ██
+  fft_peak_ratio           0.0377  █
+  edge_density             0.0345  █
+  dct_ac_std               0.0272  █
+
+What to improve with more time:
+  1. More data: 200+ images/class, varied angles/screens/lighting.
+  2. Augmentation: JPEG re-compress, brightness jitter, random crop.
+  3. MobileNetV3-Small fine-tuned head for subtle patterns.
+  4. Isotonic regression for calibrated probability output.
+  5. ROC-curve threshold selection via business cost matrix.
