@@ -1,18 +1,3 @@
-"""
-predict.py — Classify one image as real (0) or screen recapture (1).
-
-Usage:
-    python predict.py <image_path>
-
-Stdout:  a single float in [0, 1]
-            0.0 → confident real photo
-            1.0 → confident photo of a screen
-
-Stderr:  latency in ms  (so piping the score still works cleanly)
-
-Requires model.joblib to exist — run train.py first.
-"""
-
 import os
 import sys
 import time

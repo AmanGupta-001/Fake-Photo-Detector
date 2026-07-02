@@ -109,6 +109,15 @@ html, body, [class*="css"] {
     background: linear-gradient(135deg, rgba(124,92,252,0.14), rgba(200,100,255,0.08)) !important;
 }
 
+/* ── camera input override ── */
+[data-testid="stCameraInput"] {
+    background: linear-gradient(135deg, rgba(124,92,252,0.08), rgba(200,100,255,0.04)) !important;
+    border: 1px solid rgba(124,92,252,0.3) !important;
+    border-radius: 16px !important;
+    padding: 8px !important;
+}
+
+
 /* ── verdict banner ── */
 .verdict-real {
     background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(16,185,129,0.10));
@@ -322,7 +331,7 @@ def main():
     <div class="hero">
         <div class="hero-badge">🔍 AI-Powered Detection</div>
         <h1>FakePhoto Detector</h1>
-        <p>Upload any image — our machine learning model analyses 20 physical signals to instantly tell if it's a genuine photo or a screen recapture.</p>
+        <p>Upload an image or capture a live photo — our machine learning model analyses 20 physical signals to instantly tell if it's a genuine photo or a screen recapture.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -335,27 +344,47 @@ def main():
     col_left, col_right = st.columns([1, 1.05], gap="large")
 
     with col_left:
-        # ── Upload ──
-        st.markdown('<div class="section-label">Upload Image</div>', unsafe_allow_html=True)
-        uploaded = st.file_uploader(
-            "",
-            type=["jpg", "jpeg", "png", "webp", "bmp"],
-            label_visibility="collapsed",
-            help="Supported formats: JPG, PNG, WebP, BMP",
+        # ── Input Method Selection ──
+        st.markdown('<div class="section-label">Select Input Method</div>', unsafe_allow_html=True)
+        input_method = st.segmented_control(
+            "Select Input Method",
+            options=["📁 Upload Image", "📷 HD Webcam"],
+            default="📁 Upload Image",
+            label_visibility="collapsed"
         )
 
-        if uploaded is not None:
+        input_file = None
+        file_name = None
+
+        if input_method == "📁 Upload Image":
+            input_file = st.file_uploader(
+                "",
+                type=["jpg", "jpeg", "png", "webp", "bmp"],
+                label_visibility="collapsed",
+                help="Supported formats: JPG, PNG, WebP, BMP",
+            )
+            if input_file is not None:
+                file_name = input_file.name
+        else:
+            input_file = st.camera_input(
+                "Take a picture",
+                label_visibility="collapsed"
+            )
+            if input_file is not None:
+                file_name = "webcam_capture.jpg"
+
+        if input_file is not None:
             # Save to temp file for OpenCV
-            suffix = Path(uploaded.name).suffix or ".jpg"
+            suffix = Path(file_name).suffix or ".jpg"
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                tmp.write(uploaded.getvalue())  # getvalue() never exhausts the buffer unlike read()
+                tmp.write(input_file.getvalue())  # getvalue() never exhausts the buffer unlike read()
                 tmp_path = tmp.name
 
             # Show image preview
             st.markdown('<hr class="divider">', unsafe_allow_html=True)
             st.markdown('<div class="section-label">Image Preview</div>', unsafe_allow_html=True)
             pil_img = Image.open(tmp_path)
-            st.image(pil_img, width='stretch', caption=f"{uploaded.name}  ·  {pil_img.width}×{pil_img.height}px")
+            st.image(pil_img, width='stretch', caption=f"{file_name}  ·  {pil_img.width}×{pil_img.height}px")
 
             # ── Run analysis ──
             st.markdown('<hr class="divider">', unsafe_allow_html=True)
@@ -379,7 +408,7 @@ def main():
             """, unsafe_allow_html=True)
 
             # ── Stats pills ──
-            size_kb = len(uploaded.getvalue()) // 1024
+            size_kb = len(input_file.getvalue()) // 1024
             st.markdown(f"""
             <div class="stat-row">
                 <div class="stat-pill">⚡ {ms:.1f} ms latency</div>
@@ -397,17 +426,20 @@ def main():
             # Store for right column
             st.session_state["vec"]   = vec
             st.session_state["score"] = score
-            st.session_state["name"]  = uploaded.name
+            st.session_state["name"]  = file_name
 
         else:
             # ── Placeholder ──
-            st.markdown("""
+            placeholder_text = "No image uploaded yet" if input_method == "📁 Upload Image" else "No image captured yet"
+            placeholder_sub = "Drop a photo above to analyse it" if input_method == "📁 Upload Image" else "Capture a live photo above to analyse it"
+            st.markdown(f"""
             <div class="glass-card" style="text-align:center; padding:3rem 1.5rem; color:#555577;">
                 <div style="font-size:3rem; margin-bottom:1rem;">📷</div>
-                <div style="font-size:1rem; font-weight:600; color:#7777aa;">No image uploaded yet</div>
-                <div style="font-size:0.85rem; margin-top:0.5rem;">Drop a photo above to analyse it</div>
+                <div style="font-size:1rem; font-weight:600; color:#7777aa;">{placeholder_text}</div>
+                <div style="font-size:0.85rem; margin-top:0.5rem;">{placeholder_sub}</div>
             </div>
             """, unsafe_allow_html=True)
+
 
     # Compute model display name once — used both in Model Info card and the footer
     _m = load_model()

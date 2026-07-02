@@ -1,15 +1,3 @@
-"""
-train.py — Train and evaluate the real-vs-screen classifier.
-
-Usage:
-    python train.py                           # looks for ./real/ and ./screen/
-    python train.py --real PATH --screen PATH
-
-Outputs:
-    model.joblib   — saved pipeline (StandardScaler + classifier)
-    report.txt     — honest cross-validated metrics + feature importances
-"""
-
 import argparse
 import os
 import sys
@@ -33,12 +21,10 @@ from features import extract, NAMES
 
 warnings.filterwarnings("ignore")
 
-REAL   = 0   # label for genuine photos
-SCREEN = 1   # label for screen / recapture photos
+REAL   = 0   
+SCREEN = 1   
 EXTS   = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff", ".heic"}
 
-
-# -- data loading -----------------------------------------------------
 
 def load_folder(folder: Path, label: int):
     paths = sorted(p for p in folder.iterdir() if p.suffix.lower() in EXTS)
@@ -54,37 +40,22 @@ def load_folder(folder: Path, label: int):
     print(f"  {len(X):3d} images ← {folder}/")
     return np.array(X, dtype=np.float32), np.array(y, dtype=int)
 
-
-# -- models to try ----------------------------------------------------
-
 def candidates():
     return {
         "logistic": Pipeline([
             ("scale", StandardScaler()),
-            ("clf",   LogisticRegression(C=1.0, max_iter=2000,
-                                         class_weight="balanced",
-                                         random_state=42)),
+            ("clf",   LogisticRegression(C=1.0, max_iter=2000,class_weight="balanced",random_state=42)),
         ]),
         "random_forest": Pipeline([
             ("scale", StandardScaler()),
-            ("clf",   RandomForestClassifier(n_estimators=300,
-                                              max_depth=8,
-                                              min_samples_leaf=2,
-                                              class_weight="balanced",
-                                              random_state=42,
-                                              n_jobs=-1)),
+            ("clf",   RandomForestClassifier(n_estimators=300,max_depth=8,min_samples_leaf=2,class_weight="balanced",random_state=42,n_jobs=-1)),
         ]),
         "grad_boost": Pipeline([
             ("scale", StandardScaler()),
-            ("clf",   GradientBoostingClassifier(n_estimators=150,
-                                                  max_depth=4,
-                                                  learning_rate=0.05,
-                                                  random_state=42)),
+            ("clf",   GradientBoostingClassifier(n_estimators=150,max_depth=4,learning_rate=0.05,random_state=42)),
         ]),
     }
 
-
-# -- evaluation -------------------------------------------------------
 
 def cv_eval(name, pipe, X, y, cv):
     y_hat   = cross_val_predict(pipe, X, y, cv=cv)
@@ -106,9 +77,6 @@ def importances(pipe):
     idx = np.argsort(imp)[::-1]
     return [(NAMES[i], float(imp[i])) for i in idx]
 
-
-# -- main -------------------------------------------------------------
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--real",   default="real")
@@ -125,7 +93,7 @@ def main():
                      "Create 'real/' and 'screen/' with your phone photos first.\n"
                      "Or run:  python generate_demo_data.py")
 
-    print("\n-- Loading images ------------------------------------------")
+    print("\n-- Loading images---------------")
     t0 = time.perf_counter()
     Xr, yr = load_folder(rd, REAL)
     Xs, ys = load_folder(sd, SCREEN)
