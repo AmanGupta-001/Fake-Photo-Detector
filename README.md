@@ -103,9 +103,4 @@ python train.py
 
 ~20–60 ms per image on a CPU after one-time model load. No GPU required.
 
-## License
-
-MIT
-=======
-# Fake-Photo-Detector
->>>>>>> b3c9f0dfdee0adf32a66e987523aaed3ddbb0797
+##MADE WITH LOVE By Aman Gupta
