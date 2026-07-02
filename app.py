@@ -409,6 +409,16 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
+    # Compute model display name once — used both in Model Info card and the footer
+    _m = load_model()
+    _clf_name = type(_m.named_steps["clf"]).__name__ if _m else "Unknown"
+    clf_display = {
+        "RandomForestClassifier": "Random Forest",
+        "LogisticRegression": "Logistic Regression",
+        "GradientBoostingClassifier": "Gradient Boosting",
+    }.get(_clf_name, _clf_name)
+    model_kb = (HERE / "model.joblib").stat().st_size // 1024
+
     with col_right:
         # ── Feature breakdown ──
         if "vec" in st.session_state:
@@ -464,16 +474,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-            # ── Model info card ──
-            model = load_model()
-            clf_name = type(model.named_steps["clf"]).__name__ if model else "Unknown"
-            # Make it human-readable
-            clf_display = {
-                "RandomForestClassifier": "Random Forest",
-                "LogisticRegression": "Logistic Regression",
-                "GradientBoostingClassifier": "Gradient Boosting",
-            }.get(clf_name, clf_name)
-            model_kb = (HERE / "model.joblib").stat().st_size // 1024
+            # ── Model info card ── (clf_display / model_kb computed above)
 
             st.markdown('<hr class="divider">', unsafe_allow_html=True)
             st.markdown('<div class="section-label">Model Info</div>', unsafe_allow_html=True)
