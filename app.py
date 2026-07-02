@@ -465,14 +465,24 @@ def main():
             """, unsafe_allow_html=True)
 
             # ── Model info card ──
+            model = load_model()
+            clf_name = type(model.named_steps["clf"]).__name__ if model else "Unknown"
+            # Make it human-readable
+            clf_display = {
+                "RandomForestClassifier": "Random Forest",
+                "LogisticRegression": "Logistic Regression",
+                "GradientBoostingClassifier": "Gradient Boosting",
+            }.get(clf_name, clf_name)
+            model_kb = (HERE / "model.joblib").stat().st_size // 1024
+
             st.markdown('<hr class="divider">', unsafe_allow_html=True)
             st.markdown('<div class="section-label">Model Info</div>', unsafe_allow_html=True)
-            st.markdown("""
+            st.markdown(f"""
             <div class="glass-card">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                     <div>
                         <div style="font-size:0.75rem; color:#666; margin-bottom:0.2rem;">Algorithm</div>
-                        <div style="font-weight:600; color:#ddd;">Logistic Regression</div>
+                        <div style="font-weight:600; color:#ddd;">{clf_display}</div>
                     </div>
                     <div>
                         <div style="font-size:0.75rem; color:#666; margin-bottom:0.2rem;">Features</div>
@@ -484,25 +494,25 @@ def main():
                     </div>
                     <div>
                         <div style="font-size:0.75rem; color:#666; margin-bottom:0.2rem;">Latency</div>
-                        <div style="font-weight:600; color:#ddd;">~20–60 ms / image</div>
+                        <div style="font-weight:600; color:#ddd;">~20-60 ms / image</div>
                     </div>
                     <div>
                         <div style="font-size:0.75rem; color:#666; margin-bottom:0.2rem;">Model size</div>
-                        <div style="font-weight:600; color:#ddd;">&lt; 1 MB</div>
+                        <div style="font-weight:600; color:#ddd;">{model_kb} KB</div>
                     </div>
                     <div>
                         <div style="font-size:0.75rem; color:#666; margin-bottom:0.2rem;">GPU required</div>
-                        <div style="font-weight:600; color:#22c55e;">None ✓</div>
+                        <div style="font-weight:600; color:#22c55e;">None &#10003;</div>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
     # ── Footer ──
-    st.markdown("""
+    st.markdown(f"""
     <hr class="divider">
     <div style="text-align:center; color:#444466; font-size:0.8rem; padding-bottom:1rem;">
-        FakePhoto Detector &nbsp;·&nbsp; Random Forest + 20 hand-crafted CV features &nbsp;·&nbsp; No GPU required
+        FakePhoto Detector &nbsp;&middot;&nbsp; {clf_display} + 20 hand-crafted CV features &nbsp;&middot;&nbsp; No GPU required
     </div>
     """, unsafe_allow_html=True)
 
